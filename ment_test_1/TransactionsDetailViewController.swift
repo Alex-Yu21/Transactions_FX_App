@@ -1,0 +1,43 @@
+//
+//  TransactionsDetailViewController.swift
+//  ment_test_1
+//
+//  Created by sun on 6/1/26.
+//
+
+import UIKit
+
+class TransactionsDetailViewController: UITableViewController {
+    var sku: String = ""
+    var transactions: [TransactionModel] = []
+    var rates: [RateModel] = []
+    var converter: CurrencyConverter?
+    
+    override func viewDidLoad() {
+          super.viewDidLoad()
+          title = sku
+          converter = CurrencyConverter(rates: rates)
+      }
+    
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+          return transactions.count
+      }
+    
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+          let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+          let transaction = transactions[indexPath.row]
+          let gbpAmount = converter?.convert(amount: transaction.amount,
+          from: transaction.currency, to: "GBP") ?? 0
+          cell.textLabel?.text = "\(transaction.currency)\(transaction.amount) → GBP \(gbpAmount)"
+          return cell
+      }
+    
+    override func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+          var total = 0.0
+          for transaction in transactions {
+              total += converter?.convert(amount: transaction.amount,
+       from: transaction.currency, to: "GBP") ?? 0
+          }
+          return "Total: GBP \(total)"
+      }
+}
