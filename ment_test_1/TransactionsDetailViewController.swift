@@ -8,14 +8,16 @@
 import UIKit
 
 class TransactionsDetailViewController: UITableViewController {
+    
     var sku: String = ""
     var transactions: [TransactionModel] = []
     var rates: [RateModel] = []
+    
     var converter: CurrencyConverter?
     
     override func viewDidLoad() {
           super.viewDidLoad()
-          title = sku
+          title = "Transactions for \(sku)"
           converter = CurrencyConverter(rates: rates)
       }
     
@@ -28,11 +30,17 @@ class TransactionsDetailViewController: UITableViewController {
           let transaction = transactions[indexPath.row]
           let gbpAmount = converter?.convert(amount: transaction.amount,
           from: transaction.currency, to: "GBP") ?? 0
-          cell.textLabel?.text = "\(transaction.currency)\(transaction.amount) → GBP \(gbpAmount)"
+          
+        cell.textLabel?.text = "\(transaction.currency)\(transaction.amount)"
+          cell.detailTextLabel?.text = "GBP\(gbpAmount)"
+        
+        cell.textLabel?.font = UIFont.systemFont(ofSize: 20)
+         cell.detailTextLabel?.font = UIFont.systemFont(ofSize: 18)
+        
           return cell
       }
     
-    override func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
           var total = 0.0
           for transaction in transactions {
               total += converter?.convert(amount: transaction.amount,
