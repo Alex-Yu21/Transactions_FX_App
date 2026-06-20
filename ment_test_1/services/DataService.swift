@@ -1,81 +1,40 @@
-//
-//  DataService.swift
-//  ment_test_1
-//
-//  Created by sun on 3/13/26.
-//
 import Foundation
 
-struct DataService {
+final class DataService {
+    static let shared = DataService()
+
+    private init() {}
+
     func loadRates() -> [RateModel] {
-        guard let url = Bundle.main.url(forResource: "rates", withExtension: "plist")
-        else { return []
-        }
-        
-        guard let data = try? Data(contentsOf: url)
-        else {
-            return []
-        }
-        
-        guard let array = try? PropertyListSerialization.propertyList(from: data, format: nil) as? [[String: Any]]
-        else {
-            return []
-        }
-        
-        var rates: [RateModel] = []
-
-        for dictionary in array {
-            guard let rateString = dictionary["rate"] as? String,
-                    let rate = Double(rateString),
-                    let from = dictionary["from"] as? String,
-                    let to = dictionary["to"] as? String
-              else {
-                  continue
-              }
-            let rateModel = RateModel(from: from, to: to, rate: rate)
-            
-            rates.append(rateModel)
-        }
-        
-        return rates
-
-        
+        load(resource: Constants.ratesResource)
     }
-    
+
     func loadTransactions() -> [TransactionModel] {
-        guard let url = Bundle.main.url(forResource: "transactions", withExtension: "plist")
-        else { return []
-        }
-        
-        guard let data = try? Data(contentsOf: url)
-        else {
-            return []
-        }
-        
-        guard let array = try? PropertyListSerialization.propertyList(from: data, format: nil) as?
-                [[String: Any]]
-        else {
-            return []
-        }
-        
-        var transactions: [TransactionModel] = []
-
-        for dictionary in array {
-            guard let amountString = dictionary["amount"] as? String,
-                    let amount = Double(amountString),
-                    let currency = dictionary["currency"] as? String,
-                    let sku = dictionary["sku"] as? String
-              else {
-                  continue
-              }
-            let transactionModel = TransactionModel(amount: amount, currency: currency, sku: sku)
-            
-            transactions.append(transactionModel)
-        }
-        
-        return transactions
-
+        load(resource: Constants.transactionsResource)
     }
-    
 }
-  
+
+// Private Methods
+private extension DataService {
+    func load<Item: Decodable>(resource: String) -> [Item] {
+        guard let url = Bundle.main.url(forResource: resource, withExtension: Constants.fileExtension) else {
+            return []
+        }
+        guard let data = try? Data(contentsOf: url) else {
+            return []
+        }
+        guard let items = try? PropertyListDecoder().decode([Item].self, from: data) else {
+            return []
+        }
+        return items
+    }
+}
+
+// Constants
+private extension DataService {
+    enum Constants {
+        static let ratesResource = "rates"
+        static let transactionsResource = "transactions"
+        static let fileExtension = "plist"
+    }
+}

@@ -1,10 +1,3 @@
-//
-//  SceneDelegate.swift
-//  ment_test_1
-//
-//  Created by sun on 3/13/26.
-//
-
 import UIKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {

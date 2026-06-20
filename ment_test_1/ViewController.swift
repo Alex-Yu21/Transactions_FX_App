@@ -1,55 +1,48 @@
-//
-//  ViewController.swift
-//  ment_test_1
-//
-//  Created by sun on 3/13/26.
-//
-
 import UIKit
 
 class ViewController: UITableViewController {
-    var transactions: [TransactionModel] = []
-    var groupedTransactions: [String: [TransactionModel]] = [:]
-    var skus: [String] = []
-    var rates: [RateModel] = []
+
+    // Private Properties
+
+    private let viewModel = ProductsViewModel()
+
+    // UITableViewController
 
     override func viewDidLoad() {
         super.viewDidLoad()
-       
-        title = "Products"
-        rates = DataService().loadRates()
-        transactions = DataService().loadTransactions()
-        groupedTransactions = Dictionary(grouping: transactions, by: { $0.sku })
-        skus = Array(groupedTransactions.keys).sorted()
-    }
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "showDetail" {
-            if let indexPath = tableView.indexPathForSelectedRow {
-                let sku = skus[indexPath.row]
-                let detail = segue.destination as! TransactionsDetailViewController
-                
-                detail.sku = sku
-                detail.transactions = groupedTransactions[sku] ?? []
-                detail.rates = rates
-            }
-        }
+        title = Constants.title
+        viewModel.loadProducts()
     }
 
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        guard segue.identifier == Constants.detailSegueIdentifier,
+              let indexPath = tableView.indexPathForSelectedRow,
+              let detailViewController = segue.destination as? TransactionsDetailViewController else {
+            return
+        }
+        detailViewController.viewModel = viewModel.makeDetailViewModel(at: indexPath.row)
+    }
+}
+
+// UITableViewDataSource
+extension ViewController {
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return skus.count
+        viewModel.productCount
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-        let sku = skus[indexPath.row]
-        let count = groupedTransactions[sku]?.count ?? 0
-        
-        cell.textLabel?.text = sku
-        cell.detailTextLabel?.text = "\(count) transactions"
-        cell.textLabel?.font = UIFont.systemFont(ofSize: 20)
-         cell.detailTextLabel?.font = UIFont.systemFont(ofSize: 18)
-        
+        let cell = tableView.dequeueReusableCell(withIdentifier: Constants.cellIdentifier, for: indexPath)
+        cell.textLabel?.text = viewModel.sku(at: indexPath.row)
+        cell.detailTextLabel?.text = "\(viewModel.transactionCount(at: indexPath.row)) transactions"
         return cell
+    }
+}
+
+// Constants
+private extension ViewController {
+    enum Constants {
+        static let title = "Products"
+        static let cellIdentifier = "Cell"
+        static let detailSegueIdentifier = "showDetail"
     }
 }
