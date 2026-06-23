@@ -1,29 +1,25 @@
 import UIKit
 
-class TransactionsDetailViewController: UITableViewController {
-
-    // Public Properties
-
-    var viewModel: TransactionsDetailViewModel?
-
-    // UITableViewController
+final class TransactionDetailViewController: UITableViewController {
+    var viewModel: TransactionDetailViewModeling?
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = viewModel?.title
+        title = viewModel?.screenTitle
     }
 }
 
 // UITableViewDataSource
-extension TransactionsDetailViewController {
+extension TransactionDetailViewController {
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        viewModel?.transactionCount ?? 0
+        viewModel?.itemCount ?? 0
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: Constants.cellIdentifier, for: indexPath)
-        cell.textLabel?.text = viewModel?.originalAmountText(at: indexPath.row)
-        cell.detailTextLabel?.text = viewModel?.convertedAmountText(at: indexPath.row)
+        let item = viewModel?.item(at: indexPath.row)
+        cell.textLabel?.text = item?.originalText
+        cell.detailTextLabel?.text = item?.convertedText
         return cell
     }
 
@@ -33,7 +29,7 @@ extension TransactionsDetailViewController {
 }
 
 // Constants
-private extension TransactionsDetailViewController {
+private extension TransactionDetailViewController {
     enum Constants {
         static let cellIdentifier = "Cell"
     }
